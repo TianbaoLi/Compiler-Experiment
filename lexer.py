@@ -3,6 +3,7 @@
 import sys
 from Tkinter import *
 from tkFont import *
+from FileDialog import *
 
 KEYWORD_LIST = ['if', 'else', 'while', 'break', 'continue', 'for', 'double', 'int', 'float', 'long', 'short', 'bool', 
 				'switch', 'case', 'return', 'void']
@@ -282,6 +283,16 @@ root = Tk()
 code = Text(root, width=50, height=30, font=15)
 analysis = Text(root, width=50, height=30, font=15)
 
+def fileloader():
+	global root
+	fd = LoadFileDialog(root)
+	filename = fd.go()
+	fin = open(filename, "r")
+	input_file = fin.read()
+	input_lines = input_file[0].split("\n")
+	code.insert(1.0, input_file)
+	fin.close()
+
 def lexer():
 	global current_row
 	global current_line
@@ -310,10 +321,12 @@ def pre_interface():
 	t = StringVar()
 	t.set('Lexer by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
-	button = Button(root, text = 'Lexical Analysis', command = lexer, font=15)
+	Analysis = Button(root, text = 'Lexical Analysis', command = lexer, font=15)
+	load = Button(root, text = '    Lode  code    ', command = fileloader, font=15)
 	root.title("LEXER")
 	label.pack(side = TOP)
-	button.pack(side = BOTTOM)
+	Analysis.pack(side = BOTTOM)
+	load.pack(side = BOTTOM)
 	code.pack(side = LEFT)
 	analysis.pack(side = RIGHT) 
 	root.mainloop()
