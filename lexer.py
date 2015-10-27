@@ -173,7 +173,8 @@ def scanner():
 			row = current_row + 1
 			ungetchar()
 			error('illigal identifier', line, row)
-			return ('SCANEOF', '', '')
+			#return ('SCANEOF', '', '')
+			return ('', '', '')
 		if current_char != '.' and current_char != 'e':
 			ungetchar()
 			return ('INT10', int_value, CATEGORY_DICT['int10'])
@@ -188,7 +189,8 @@ def scanner():
 				row = current_row + 1
 				ungetchar()
 				error('illigal const int value in power', line, row)
-				return ('SCANEOF', '', '')
+				#return ('SCANEOF', '', '')
+				return ('', '', '')
 			ungetchar()
 			return ('INT10', power_value, CATEGORY_DICT['int10'])
 		if current_char == '.':
@@ -202,7 +204,8 @@ def scanner():
 				row = current_row + 1
 				ungetchar()
 				error('illigal const float value', line, row)
-				return ('SCANEOF', '', '')
+				#return ('SCANEOF', '', '')
+				return ('', '', '')
 			ungetchar()
 			return ('FLOAT_CONST', float_value, CATEGORY_DICT['float_const'])
 	if current_char.isalpha() or current_char == '_':
@@ -229,7 +232,6 @@ def scanner():
 			current_char = getchar()
 			if current_char == 'SCANEOF':
 				error('missing terminating \"', line, row)
-
 				current_line = line
 				current_row = row
 				return ('SCANEOF', '', '')
@@ -285,6 +287,7 @@ analysis = Text(root, width=50, height=30, font=15)
 
 def fileloader():
 	global root
+	code.delete(1.0, END)
 	fd = LoadFileDialog(root)
 	filename = fd.go()
 	fin = open(filename, "r")

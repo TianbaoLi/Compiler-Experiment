@@ -24,4 +24,5 @@ int main()/* the main function*/
 	c = 8 & 7;
 	e = D[2];
 	func1();
+	string s = "hello world!";
 }
