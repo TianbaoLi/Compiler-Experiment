@@ -171,7 +171,7 @@ def scanner():
 		if current_char not in OPERATOR_LIST and current_char not in SEPARATOR_LIST and current_char != 'e':
 			line = current_line + 1
 			row = current_row + 1
-			ungetchar()
+			#ungetchar()
 			error('illigal identifier', line, row)
 			#return ('SCANEOF', '', '')
 			return ('', '', '')
@@ -181,13 +181,16 @@ def scanner():
 		if current_char == 'e':
 			power_value = str(int_value) + 'e'
 			current_char = getchar()
+			if current_char == '+' or current_char == '-':
+				power_value += current_char
+				current_char = getchar()
 			while current_char.isdigit():
 				power_value += current_char
 				current_char = getchar()
 			if current_char not in OPERATOR_LIST and current_char not in SEPARATOR_LIST:
 				line = current_line + 1
 				row = current_row + 1
-				ungetchar()
+				#ungetchar()
 				error('illigal const int value in power', line, row)
 				#return ('SCANEOF', '', '')
 				return ('', '', '')
@@ -202,7 +205,7 @@ def scanner():
 			if current_char not in OPERATOR_LIST and current_char not in SEPARATOR_LIST or current_char == '.':
 				line = current_line + 1
 				row = current_row + 1
-				ungetchar()
+				#ungetchar()
 				error('illigal const float value', line, row)
 				#return ('SCANEOF', '', '')
 				return ('', '', '')

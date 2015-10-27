@@ -1,16 +1,16 @@
 int func1 () {
 	while(num!=100){num++;}
 }
-int main()/* the main function*/
+int main()/*the main function*/
 {
-	int a;
+	int 23a;/*identifier*/
 	float _b;
 	bool c12_354;
 	int D[10];
 	float e;
-	c = 1e8;
+	c = 1e-8;
 	if(c > 0) {
-		a = 1.1 + 10;
+		a = 1.1.1 + 10;/*wrong float*/
 		b = 10.9 + 8.9;
 	}
 	else {
