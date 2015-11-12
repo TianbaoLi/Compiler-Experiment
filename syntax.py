@@ -14,6 +14,7 @@ follow = {}
 parsing_table = {}
 token = []
 token_attr = []
+leaf_tab = {}
 
 def fileloader():
 	global root
@@ -84,6 +85,7 @@ def grammar_scanner():
 		for each in line_nonterminal:
 			if each not in nonterminal:
 				nonterminal.append(each)
+				leaf_tab[each] = 0
 		for each in line_terminal:
 			if each not in terminal:
 				terminal.append(each)
@@ -199,6 +201,9 @@ def syntax_analysis():
 	global token
 	stack = range(1000)
 	stack[0] = 'program'
+	tab = range(1000)
+	tab[0] = 0
+	leaf_tab['program'] = 0
 	stack_top = 0
 	token_pointer = 0
 
@@ -210,37 +215,40 @@ def syntax_analysis():
 
 			if stack[stack_top] == token[token_pointer]:
 				if token[token_pointer] not in ("IDN", "INUM", "FNUM"):
-					syntax_result.append('leaf:[' + token[token_pointer] + ']')
+					syntax_result.append('    ' * tab[stack_top] + 'leaf:[' + token[token_pointer] + ']')
 				else:
-					syntax_result.append('leaf:[' + token[token_pointer] + ":" + token_attr[token_pointer] + ']')
+					syntax_result.append('    ' * tab[stack_top] + 'leaf:[' + token[token_pointer] + ":" + token_attr[token_pointer] + ']')
 
 				#print 'leaf:[' + token[token_pointer] + ']'
 			else:
-				syntax_result.append('error:不可接受的终结符：[' + token[token_pointer] + ']')		
+				syntax_result.append('    ' * tab[stack_top] + 'error:不可接受的终结符：[' + token[token_pointer] + ']')		
 			stack_top -= 1
 			token_pointer += 1
 		else:
 			if parsing_table[stack[stack_top]][token[token_pointer]] < 0:
 				if ['Lambda'] in grammar[stack[stack_top]]:
-					syntax_result.append('success: [' + stack[stack_top] + ']\t->\t[Lambda]')
+					#syntax_result.append('success: [' + stack[stack_top] + ']\t->\t[Lambda]')
 					stack_top -= 1
 				else:
 					if parsing_table[stack[stack_top]][token[token_pointer]] == -1:
-						syntax_result.append('error: [' + token[token_pointer] + ']不可接受,进入同步恢复状态,栈顶元素为:'+stack[stack_top])
+						syntax_result.append('    ' * tab[stack_top] + 'error: [' + token[token_pointer] + ']不可接受,进入同步恢复状态,栈顶元素为:'+stack[stack_top])
 						stack_top -= 1
 					else:
-						syntax_result.append('error: [' + token[token_pointer] + ']不可接受,忽略该符号以恢复错误')
+						syntax_result.append('    ' * tab[stack_top] + 'error: [' + token[token_pointer] + ']不可接受,忽略该符号以恢复错误')
 						token_pointer += 1
 			else:
 				tmp_sequence = grammar[stack[stack_top]][parsing_table[stack[stack_top]][token[token_pointer]]]
 				
-				tmp_str = 'success: [' + stack[stack_top] + ']\t->\t'
+				tmp_str = '    ' * tab[stack_top] + 'success: [' + stack[stack_top] + ']\t->\t'
+				tab_temp = tab[stack_top]
 				stack_top -= 1
 				for x in xrange(0,len(tmp_sequence)):
 					tmp_str = tmp_str + '[' + tmp_sequence[x] +']'
 					stack_top += 1
 					stack[stack_top] = tmp_sequence[len(tmp_sequence) - 1 - x]
-		
+					tab[stack_top] = tab_temp + 1
+				syntax_result.append(tmp_str)
+					
 		if token_pointer == len(token):
 			break	
 	for each in syntax_result:
@@ -249,7 +257,7 @@ def syntax_analysis():
 
 root = Tk()
 code = ScrolledText(root, width=50, height=30, font=15)
-analysis = ScrolledText(root, width=50, height=30, font=15)
+analysis = ScrolledText(root, width=200, height=30, font=10)
 
 def interface():
 	global root
@@ -258,9 +266,10 @@ def interface():
 	t = StringVar()
 	t.set('Syntax by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
-	Analysis = Button(root, text = 'Syntax Analysis', command = syntax_analysis, font=15)
-	load = Button(root, text = '    Load token    ', command = fileloader, font=15)
+	Analysis = Button(root, text = 'Syntax  Analysis', command = syntax_analysis, font=15)
+	load = Button(root, text = '    Load  token    ', command = fileloader, font=15)
 	root.title("Syntax")
+	root.geometry('1600x800')
 	label.pack(side = TOP)
 	Analysis.pack(side = BOTTOM)
 	load.pack(side = BOTTOM)
