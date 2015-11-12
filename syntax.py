@@ -6,17 +6,6 @@ from tkFont import *
 from FileDialog import *
 from ScrolledText import ScrolledText
 
-def fileloader():
-	global root
-	code.delete(1.0, END)
-	fd = LoadFileDialog(root)
-	filename = fd.go()
-	fin = open(filename, "r")
-	input_file = fin.read()
-	input_lines = input_file[0].split("\n")
-	code.insert(1.0, input_file)
-	fin.close()
-
 grammar = {}
 terminal = []
 nonterminal = []
@@ -24,6 +13,27 @@ first = {}
 follow = {}
 parsing_table = {}
 token = []
+
+def fileloader():
+	global root
+	global token
+	code.delete(1.0, END)
+	fd = LoadFileDialog(root)
+	filename = fd.go()
+	fin = open(filename, "r")
+	input_file = fin.read()
+	code.insert(1.0, input_file)
+	input_lines = input_file.split('\n')
+	for lines in input_lines:
+		tags = lines.split('\t')
+		while tags.count('') > 0:
+			tags.remove('')
+		if(len(tags) != 0):
+			if(tags[0] == 'SEP' or tags[0] == 'OP'):
+				token.append(tags[1])
+			else:
+				token.append(tags[0])
+	fin.close()
 
 def grammar_scanner():
 	grammarIn = open('grammar.ds', 'r')
@@ -52,16 +62,18 @@ def grammar_scanner():
 				line_nonterminal.append(temp)
 				grammar_sequence.append(temp)
 				temp = ""
-				i = i + 1
 			elif tags[1][i] == '[':
 				i = i + 1
 				while tags[1][i] != ']':
 					temp += tags[1][i]
 					i += 1
+				
+				if i != len(tags[1]) - 1 and  tags[1][i+1] == ']':
+					temp += tags[1][i]
+					i += 1
 				line_terminal.append(temp)
 				grammar_sequence.append(temp)
 				temp = ""
-				i = i + 1
 			i += 1
 		if grammar_sequence[0] not in grammar:
 			grammar[grammar_sequence[0]] = []
@@ -73,15 +85,6 @@ def grammar_scanner():
 			if each not in terminal:
 				terminal.append(each)
 	terminal.append('$')
-
-'''	
-	print "gramamr"
-	print grammar
-	print "terminal"
-	print terminal
-	print "nonterminal"
-	print nonterminal
-'''
 
 def getFirst():
 	global grammar
@@ -115,7 +118,7 @@ def getFirst():
 				if counter == len(sequence) and 'null' not in first[nonter]:
 					first[nonter].append('null')
 					stopFlag = False
-				#print nonter,sequence
+
 	#print first
 
 def getFollow():
@@ -160,56 +163,82 @@ def get_parsing_table():
 	for nonter in nonterminal:
 		parsing_table[nonter] = {}
 		for ter in terminal:
-			parsing_table[nonter][ter] = -1
+			parsing_table[nonter][ter] = -2
 	
 	for nonter in nonterminal:
 		for i in xrange(0,len(grammar[nonter])):
 			counter = 0
 			for tag in grammar[nonter][i]:
-				for each_first in first[nonter]:
+				for each_first in first[tag]:
 					if parsing_table[nonter][each_first] < 0:
 						parsing_table[nonter][each_first] = i
 				if 'null' not in first[tag]:
 					break
 				else:
 					count += 1
-			if counter == len(grammar[nonter]):
+			if counter == len(grammar[nonter][i]):
 				for each_follow in follow[nonter]:
 					if each_follow in terminal:
 						if parsing_table[nonter][each_follow] < 0:
 							parsing_table[nonter][each_follow] = i
-		for nonter in nonterminal:
-			for each_follow in follow[nonter]:
-				if parsing_table[nonter][each_follow] < 0:
-					parsing_table[nonter][each_follow] = -1
-	print parsing_table
+	# 同步集合位为-1
+	for nonter in nonterminal:
+		for each_follow in follow[nonter]:
+			if parsing_table[nonter][each_follow] < 0:
+				parsing_table[nonter][each_follow] = -1
+	#print parsing_table
 
 syntax_result = []
 
-def syntax():
+def syntax_analysis():
+	global parsing_table
 	global syntax_result
 	global token
-	stack = xrange(1000)
+	stack = range(1000)
 	stack[0] = 'program'
 	stack_top = 0
 	token_pointer = 0
 
 	while(stack_top >= 0):
+		if(token_pointer >= len(token)):
+			syntax_result.append('error:程序结构不完整,编译失败')
+			break
 		if(stack[stack_top] in terminal):
-			if stack[stack_top] == sequence[token_pointer]:
-				syntax_result.append('leaf:[' + token[token_top] + ']')
-				stack_top -= 1
-				token_pointer += 1
+
+			if stack[stack_top] == token[token_pointer]:
+				syntax_result.append('leaf:[' + token[token_pointer] + ']')
+				#print 'leaf:[' + token[token_pointer] + ']'
 			else:
-				syntax_result.append('ERROR:不可接受的终结符：[' + token[token_pointer] + ']')		
+				syntax_result.append('error:不可接受的终结符：[' + token[token_pointer] + ']')		
+			stack_top -= 1
+			token_pointer += 1
 		else:
-			if[parsing_table[stack[stack_top]]]
+			if parsing_table[stack[stack_top]][token[token_pointer]] < 0:
+				if ['Lambda'] in grammar[stack[stack_top]]:
+					#syntax_result.append('success: [' + stack[stack_top] + ']\t->\t[Lambda]')
+					stack_top -= 1
+				else:
+					if parsing_table[stack[stack_top]][token[token_pointer]] == -1:
+						syntax_result.append('error: [' + token[token_pointer] + ']不可接受,进入同步恢复状态,栈顶元素为:'+stack[stack_top])
+						stack_top -= 1
+					else:
+						syntax_result.append('error: [' + token[token_pointer] + ']不可接受,忽略该符号以恢复错误')
+						token_pointer += 1
+			else:
+				tmp_sequence = grammar[stack[stack_top]][parsing_table[stack[stack_top]][token[token_pointer]]]
+				
+				tmp_str = 'success: [' + stack[stack_top] + ']\t->\t'
+				stack_top -= 1
+				for x in xrange(0,len(tmp_sequence)):
+					tmp_str = tmp_str + '[' + tmp_sequence[x] +']'
+					stack_top += 1
+					stack[stack_top] = tmp_sequence[len(tmp_sequence) - 1 - x]
+		
+		if token_pointer == len(token):
+			break	
+	for each in syntax_result:
+		analysis.insert(END,each + '\n')
 
-
-
-
-def analysis(code):
-	print 1
 
 root = Tk()
 code = ScrolledText(root, width=50, height=30, font=15)
@@ -222,14 +251,14 @@ def interface():
 	t = StringVar()
 	t.set('Syntax by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
-	Analysis = Button(root, text = 'Syntax Analysis', command = analysis, font=15)
-	load = Button(root, text = '    Lode  code    ', command = fileloader, font=15)
+	Analysis = Button(root, text = 'Syntax Analysis', command = syntax_analysis, font=15)
+	load = Button(root, text = '    Load  token    ', command = fileloader, font=15)
 	root.title("Syntax")
 	label.pack(side = TOP)
 	Analysis.pack(side = BOTTOM)
 	load.pack(side = BOTTOM)
 	code.pack(side = LEFT)
-	analysis.pack(side = RIGHT) 
+	analysis.pack(side = RIGHT)
 	root.mainloop()
 
 def main():
@@ -239,8 +268,8 @@ def main():
 	getFirst()
 	getFollow()
 	get_parsing_table()
-	#interface()
+	interface()
+	#syntax_analysis()
 	
-
 if __name__ == '__main__':
 	main()
