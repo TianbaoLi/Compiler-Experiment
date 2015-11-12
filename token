@@ -1,0 +1,109 @@
+int				266
+IDN		func1		354
+SEP		(		303
+SEP		)		304
+SEP		{		299
+while				294
+SEP		(		303
+IDN		num		354
+OP		!=		342
+INUM		100		346
+SEP		)		304
+SEP		{		299
+IDN		num		354
+OP		++		331
+SEP		;		307
+SEP		}		300
+SEP		}		300
+int				266
+IDN		main		354
+SEP		(		303
+SEP		)		304
+SEP		{		299
+int				266
+IDN		a		354
+SEP		;		307
+float				281
+IDN		_b		354
+SEP		;		307
+int				266
+IDN		c12_354		354
+SEP		;		307
+int				266
+IDN		D		354
+SEP		[		301
+INUM		10		346
+SEP		]		302
+SEP		;		307
+float				281
+IDN		e		354
+SEP		;		307
+IDN		c		354
+OP		=		318
+INUM		1e-8		346
+SEP		;		307
+if				293
+SEP		(		303
+IDN		c		354
+OP		>		316
+INUM		0		346
+SEP		)		304
+SEP		{		299
+IDN		a		354
+OP		=		318
+FNUM		1.1		353
+OP		+		330
+INUM		10		346
+SEP		;		307
+IDN		b		354
+OP		=		318
+FNUM		10.9		353
+OP		+		330
+FNUM		8.9		353
+SEP		;		307
+SEP		}		300
+else				269
+SEP		{		299
+IDN		b		354
+OP		=		318
+FNUM		1.11		353
+OP		*		339
+FNUM		8.9		353
+SEP		;		307
+SEP		}		300
+while				294
+SEP		(		303
+IDN		a		354
+SEP		)		304
+SEP		{		299
+IDN		b		354
+OP		=		318
+FNUM		10.44		353
+SEP		;		307
+IDN		e		354
+OP		=		318
+FNUM		990.45		353
+SEP		;		307
+IDN		c		354
+OP		=		318
+INUM		90		346
+SEP		;		307
+SEP		}		300
+IDN		c		354
+OP		=		318
+INUM		8		346
+OP		&		325
+INUM		7		346
+SEP		;		307
+IDN		e		354
+OP		=		318
+IDN		D		354
+SEP		[		301
+INUM		2		346
+SEP		]		302
+SEP		;		307
+IDN		func1		354
+SEP		(		303
+SEP		)		304
+SEP		;		307
+SEP		}		300
