@@ -5,7 +5,7 @@ int main()/*the main function*/
 {
 	int a;
 	float _b;
-	bool c12_354;
+	int c12_354;
 	int D[10];
 	float e;
 	c = 1e-8;

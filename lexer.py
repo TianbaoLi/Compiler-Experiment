@@ -106,22 +106,21 @@ CATEGORY_DICT = {
 	"sizeof": 343,
 	"<<=": 344,
 	">>=": 345,
-	"int10": 346,
+	"inum": 346,
 	"int16": 347,
 	"int8": 348,
 	"char": 350,
 	"string": 351,
 	"bool": 352,
-	"float_const": 353,
-	"ID": 354
+	"fnum": 353,
+	"IDN": 354
 }
 
 current_row = -1
 current_line = 0
-input_str = []
 out_line = 1
 
-def getchar():
+def getchar(input_str):
 	global current_row
 	global current_line
 	current_row += 1
@@ -136,7 +135,7 @@ def getchar():
 	return input_str[current_line][current_row]
 
 
-def ungetchar():
+def ungetchar(input_str):
 	global current_row
 	global current_line
 	current_row = current_row - 1
@@ -155,10 +154,10 @@ def error(msg, line=None, row=None):
 	analysis.insert(str(out_line) + '.end', "\n")
 	out_line = out_line + 1
 
-def scanner():
+def scanner(input_str):
 	global current_line
 	global current_row
-	current_char = getchar()
+	current_char = getchar(input_str)
 	if current_char == 'SCANEOF':
 		return ('SCANEOF', '', '')
 	if current_char.strip() == '':
@@ -167,69 +166,69 @@ def scanner():
 		int_value = 0
 		while current_char.isdigit():
 			int_value = int_value * 10 + int(current_char)
-			current_char = getchar()
+			current_char = getchar(input_str)
 		if current_char not in OPERATOR_LIST and current_char not in SEPARATOR_LIST and current_char != 'e':
 			line = current_line + 1
 			row = current_row + 1
-			#ungetchar()
+			#ungetchar(input_str)
 			error('illigal identifier', line, row)
 			#return ('SCANEOF', '', '')
 			return ('', '', '')
 		if current_char != '.' and current_char != 'e':
-			ungetchar()
-			return ('INT10', int_value, CATEGORY_DICT['int10'])
+			ungetchar(input_str)
+			return ('INUM', int_value, CATEGORY_DICT['inum'])
 		if current_char == 'e':
 			power_value = str(int_value) + 'e'
-			current_char = getchar()
+			current_char = getchar(input_str)
 			if current_char == '+' or current_char == '-':
 				power_value += current_char
-				current_char = getchar()
+				current_char = getchar(input_str)
 			while current_char.isdigit():
 				power_value += current_char
-				current_char = getchar()
+				current_char = getchar(input_str)
 			if current_char not in OPERATOR_LIST and current_char not in SEPARATOR_LIST:
 				line = current_line + 1
 				row = current_row + 1
-				#ungetchar()
+				#ungetchar(input_str)
 				error('illigal const int value in power', line, row)
 				#return ('SCANEOF', '', '')
 				return ('', '', '')
-			ungetchar()
-			return ('INT10', power_value, CATEGORY_DICT['int10'])
+			ungetchar(input_str)
+			return ('INUM', power_value, CATEGORY_DICT['inum'])
 		if current_char == '.':
 			float_value = str(int_value) + '.'
-			current_char = getchar()
+			current_char = getchar(input_str)
 			while current_char.isdigit():
 				float_value += current_char
-				current_char = getchar()
+				current_char = getchar(input_str)
 			if current_char not in OPERATOR_LIST and current_char not in SEPARATOR_LIST or current_char == '.':
 				line = current_line + 1
 				row = current_row + 1
-				#ungetchar()
+				#ungetchar(input_str)
 				error('illigal const float value', line, row)
 				#return ('SCANEOF', '', '')
 				return ('', '', '')
-			ungetchar()
-			return ('FLOAT_CONST', float_value, CATEGORY_DICT['float_const'])
+			ungetchar(input_str)
+			return ('FNUM', float_value, CATEGORY_DICT['fnum'])
 	if current_char.isalpha() or current_char == '_':
 		string = ''
 		while current_char.isalpha() or current_char.isdigit() or current_char == '_' and current_char != ' ':
 			string += current_char
-			current_char = getchar()
+			current_char = getchar(input_str)
 			if current_char == 'SCANEOF':
 				break
-		ungetchar()
+		ungetchar(input_str)
 		if string in KEYWORD_LIST:
 			return (string, '', CATEGORY_DICT[string])
 		else:
-			return ('ID', string, CATEGORY_DICT['ID'])
+			return ('IDN', string, CATEGORY_DICT['IDN'])
 
 	if current_char == '\"':
 		str_literal = ''
 		line = current_line + 1
 		row = current_row + 1
 
-		current_char = getchar()
+		current_char = getchar(input_str)
 		while current_char != '\"':
 			str_literal += current_char
 			current_char = getchar()
@@ -241,33 +240,33 @@ def scanner():
 		return('STRING_LITERAL', str_literal, CATEGORY_DICT['string'])
 
 	if current_char == '/':
-		next_char = getchar()
+		next_char = getchar(input_str)
 		line = int(current_line) + 1
 		row = int(current_row) + 1
 		if next_char == '*':
 			comment = ''
-			next_char = getchar()
+			next_char = getchar(input_str)
 			while True:
 				if next_char == 'SCANEOF':
 					error('unteminated /* comment', line, row)
 					return ('SCANEOF', '', '')
 				if next_char == '*':
-					end_char = getchar()
+					end_char = getchar(input_str)
 					if end_char == '/':
 						return None
 					if end_char == 'SCANEOF':
 						error('unteminated /* comment', line, row)
 						return ('SCANEOF', '', '')
 				comment += next_char
-				next_char = getchar()
+				next_char = getchar(input_str)
 		else:
-			ungetchar()
+			ungetchar(input_str)
 			op = current_char
-			current_char = getchar()
+			current_char = getchar(input_str)
 			if current_char in OPERATOR_LIST:
 				op += current_char
 			else:
-				ungetchar()
+				ungetchar(input_str)
 			return ('OP', op, CATEGORY_DICT[op])
 
 	if current_char in SEPARATOR_LIST:
@@ -275,11 +274,11 @@ def scanner():
 
 	if current_char in OPERATOR_LIST:
 		op = current_char
-		current_char = getchar()
+		current_char = getchar(input_str)
 		if current_char in OPERATOR_LIST:
 			op += current_char
 		else:
-			ungetchar()
+			ungetchar(input_str)
 		return ('OP', op, CATEGORY_DICT[op])
 	else:
 		error('unknown character: ' + current_char)
@@ -299,26 +298,35 @@ def fileloader():
 	code.insert(1.0, input_file)
 	fin.close()
 
-def lexer():
+def lexer(input_str):
 	global current_row
 	global current_line
-	global input_str
 	global out_line
-	analysis.delete(1.0, END)
-	input_raw = code.get(1.0, END)
-	input_str = input_raw.split("\n")
 	current_row = -1
 	current_line = 0
-	out_line = 1
+	analysis_result = []
 	
 	while True:
-		r = scanner()
+		r = scanner(input_str)
 		if r is not None:
 			if r[0] == 'SCANEOF':
 				break
-			analysis.insert(str(out_line) + '.0', str(r[0]) + "\t\t" + str(r[1]) + "\t\t" + str(r[2]))
-			analysis.insert(str(out_line) + '.end', "\n")
-			out_line = out_line + 1
+			analysis_result.append(str(r[0]) + "\t\t" + str(r[1]) + "\t\t" + str(r[2]))
+	return analysis_result
+
+def lexer_analysis():
+	input_str = []
+	analysis.delete(1.0, END)
+	input_raw = code.get(1.0, END)
+	input_str = input_raw.split("\n")
+	lexer(input_str)
+
+	out_line = 1
+	result = lexer(input_str)
+	for each in result:
+		analysis.insert(str(out_line) + '.end', each)
+		analysis.insert(str(out_line) + '.end', "\n")
+		out_line = out_line + 1
 
 def pre_interface():
 	global root
@@ -327,8 +335,8 @@ def pre_interface():
 	t = StringVar()
 	t.set('Lexer by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
-	Analysis = Button(root, text = 'Lexical Analysis', command = lexer, font=15)
-	load = Button(root, text = '    Lode  code    ', command = fileloader, font=15)
+	Analysis = Button(root, text = 'Lexical Analysis', command = lexer_analysis, font=15)
+	load = Button(root, text = '    Load  code    ', command = fileloader, font=15)
 	root.title("LEXER")
 	label.pack(side = TOP)
 	Analysis.pack(side = BOTTOM)
@@ -339,7 +347,7 @@ def pre_interface():
 
 def main():
 	pre_interface()
-	lexer()
+	#lexer()
 
 if __name__ == '__main__':
 	main()
