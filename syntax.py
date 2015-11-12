@@ -13,6 +13,7 @@ first = {}
 follow = {}
 parsing_table = {}
 token = []
+token_attr = []
 
 def fileloader():
 	global root
@@ -33,6 +34,8 @@ def fileloader():
 				token.append(tags[1])
 			else:
 				token.append(tags[0])
+			token_attr.append(tags[1])
+
 	fin.close()
 
 def grammar_scanner():
@@ -206,7 +209,11 @@ def syntax_analysis():
 		if(stack[stack_top] in terminal):
 
 			if stack[stack_top] == token[token_pointer]:
-				syntax_result.append('leaf:[' + token[token_pointer] + ']')
+				if token[token_pointer] not in ("IDN", "INUM", "FNUM"):
+					syntax_result.append('leaf:[' + token[token_pointer] + ']')
+				else:
+					syntax_result.append('leaf:[' + token[token_pointer] + ":" + token_attr[token_pointer] + ']')
+
 				#print 'leaf:[' + token[token_pointer] + ']'
 			else:
 				syntax_result.append('error:不可接受的终结符：[' + token[token_pointer] + ']')		
@@ -215,7 +222,7 @@ def syntax_analysis():
 		else:
 			if parsing_table[stack[stack_top]][token[token_pointer]] < 0:
 				if ['Lambda'] in grammar[stack[stack_top]]:
-					#syntax_result.append('success: [' + stack[stack_top] + ']\t->\t[Lambda]')
+					syntax_result.append('success: [' + stack[stack_top] + ']\t->\t[Lambda]')
 					stack_top -= 1
 				else:
 					if parsing_table[stack[stack_top]][token[token_pointer]] == -1:
@@ -252,7 +259,7 @@ def interface():
 	t.set('Syntax by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
 	Analysis = Button(root, text = 'Syntax Analysis', command = syntax_analysis, font=15)
-	load = Button(root, text = '    Load  token    ', command = fileloader, font=15)
+	load = Button(root, text = '    Load token    ', command = fileloader, font=15)
 	root.title("Syntax")
 	label.pack(side = TOP)
 	Analysis.pack(side = BOTTOM)
