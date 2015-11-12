@@ -5,6 +5,7 @@ from Tkinter import *
 from tkFont import *
 from FileDialog import *
 from ScrolledText import ScrolledText
+from lexer import lexer_analysis
 
 grammar = {}
 terminal = []
@@ -24,8 +25,9 @@ def fileloader():
 	filename = fd.go()
 	fin = open(filename, "r")
 	input_file = fin.read()
+	fin.close()
 	code.insert(1.0, input_file)
-	input_lines = input_file.split('\n')
+	input_lines = lexer_analysis(input_file)
 	for lines in input_lines:
 		tags = lines.split('\t')
 		while tags.count('') > 0:
@@ -37,7 +39,6 @@ def fileloader():
 				token.append(tags[0])
 			token_attr.append(tags[1])
 
-	fin.close()
 
 def grammar_scanner():
 	grammarIn = open('grammar.ds', 'r')
@@ -269,7 +270,7 @@ def interface():
 	Analysis = Button(root, text = 'Syntax  Analysis', command = syntax_analysis, font=15)
 	load = Button(root, text = '    Load  token    ', command = fileloader, font=15)
 	root.title("Syntax")
-	root.geometry('1600x800')
+	#root.geometry('1500x800')
 	label.pack(side = TOP)
 	Analysis.pack(side = BOTTOM)
 	load.pack(side = BOTTOM)

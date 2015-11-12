@@ -283,10 +283,6 @@ def scanner(input_str):
 	else:
 		error('unknown character: ' + current_char)
 
-root = Tk()
-code = Text(root, width=50, height=30, font=15)
-analysis = Text(root, width=50, height=30, font=15)
-
 def fileloader():
 	global root
 	code.delete(1.0, END)
@@ -298,7 +294,7 @@ def fileloader():
 	code.insert(1.0, input_file)
 	fin.close()
 
-def lexer(input_str):
+def lexer_analysis(input_str):
 	global current_row
 	global current_line
 	global out_line
@@ -314,15 +310,15 @@ def lexer(input_str):
 			analysis_result.append(str(r[0]) + "\t\t" + str(r[1]) + "\t\t" + str(r[2]))
 	return analysis_result
 
-def lexer_analysis():
+def lexer():
 	input_str = []
 	analysis.delete(1.0, END)
 	input_raw = code.get(1.0, END)
 	input_str = input_raw.split("\n")
-	lexer(input_str)
+	lexer_analysis(input_str)
 
 	out_line = 1
-	result = lexer(input_str)
+	result = lexer_analysis(input_str)
 	for each in result:
 		analysis.insert(str(out_line) + '.end', each)
 		analysis.insert(str(out_line) + '.end', "\n")
@@ -332,10 +328,14 @@ def pre_interface():
 	global root
 	global code
 	global analysis
+	root = Tk()
+	code = Text(root, width=50, height=30, font=15)
+	analysis = Text(root, width=50, height=30, font=15)
+
 	t = StringVar()
 	t.set('Lexer by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
-	Analysis = Button(root, text = 'Lexical Analysis', command = lexer_analysis, font=15)
+	Analysis = Button(root, text = 'Lexical Analysis', command = lexer, font=15)
 	load = Button(root, text = '    Load  code    ', command = fileloader, font=15)
 	root.title("LEXER")
 	label.pack(side = TOP)

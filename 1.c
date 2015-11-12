@@ -16,11 +16,11 @@ int main()/*the main function*/
 	else {
 		b = 1.11 * 8.9;
 	}
-	do {
+	while(a) {
 		b = 10.44;
 		e = 990.45;
 		c = 90;
-	}while(a);
+	}
 	c = 8 & 7;
 	e = D[2];
 	func1();
