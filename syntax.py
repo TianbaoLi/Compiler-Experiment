@@ -19,7 +19,6 @@ leaf_tab = {}
 
 def fileloader():
 	global root
-	global token
 	code.delete(1.0, END)
 	fd = LoadFileDialog(root)
 	filename = fd.go()
@@ -27,18 +26,6 @@ def fileloader():
 	input_file = fin.read()
 	fin.close()
 	code.insert(1.0, input_file)
-	input_lines = lexer_analysis(input_file)
-	for lines in input_lines:
-		tags = lines.split('\t')
-		while tags.count('') > 0:
-			tags.remove('')
-		if(len(tags) != 0):
-			if(tags[0] == 'SEP' or tags[0] == 'OP'):
-				token.append(tags[1])
-			else:
-				token.append(tags[0])
-			token_attr.append(tags[1])
-
 
 def grammar_scanner():
 	grammarIn = open('grammar.ds', 'r')
@@ -200,6 +187,8 @@ def syntax_analysis():
 	global parsing_table
 	global syntax_result
 	global token
+	global token_attr
+	global code
 	stack = range(1000)
 	stack[0] = 'program'
 	tab = range(1000)
@@ -207,6 +196,25 @@ def syntax_analysis():
 	leaf_tab['program'] = 0
 	stack_top = 0
 	token_pointer = 0
+
+	analysis.delete(1.0, END)
+	syntax_result = []
+	token = []
+	token_attr = []
+
+	input_raw = code.get(1.0, END)
+	input_str = input_raw.split("\n")
+	input_lines = lexer_analysis(input_str)
+	for lines in input_lines:
+		tags = lines.split('\t')
+		while tags.count('') > 0:
+			tags.remove('')
+		if(len(tags) != 0):
+			if(tags[0] == 'SEP' or tags[0] == 'OP'):
+				token.append(tags[1])
+			else:
+				token.append(tags[0])
+			token_attr.append(tags[1])
 
 	while(stack_top >= 0):
 		if(token_pointer >= len(token)):
@@ -268,7 +276,7 @@ def interface():
 	t.set('Syntax by LiTianbao')
 	label = Label(root, textvariable = t, font=15)
 	Analysis = Button(root, text = 'Syntax  Analysis', command = syntax_analysis, font=15)
-	load = Button(root, text = '    Load  token    ', command = fileloader, font=15)
+	load = Button(root, text = '    Load   code    ', command = fileloader, font=15)
 	root.title("Syntax")
 	#root.geometry('1500x800')
 	label.pack(side = TOP)
