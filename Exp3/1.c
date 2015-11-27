@@ -4,6 +4,7 @@ int main() {
     int c;
     float e;
     c=10;
+    q=5;
     if(c) {
         a = 1 + 10;
         b = 10.9 + 8.9;
